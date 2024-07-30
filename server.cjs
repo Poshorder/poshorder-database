@@ -24,7 +24,7 @@ const db = admin.firestore()
 const colRef = db.collection('products/');
 
 
-app.get('/api/products', async (req, res) => {
+app.get('/api/products/', async (req, res) => {
   const data = [];
   try {
     const snapshot = await colRef.get();
