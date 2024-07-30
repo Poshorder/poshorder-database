@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "devStart": "nodemon server.cjs",
+    "serve": "node server.cjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
