@@ -15,20 +15,23 @@ import { RouterLink, RouterView } from 'vue-router'
 <style scoped>
 nav {
   position: fixed;
-  left: 0;
-  display: flex;
-  flex-direction: column;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
   gap: 1.7em;
+  border-radius: 0.5em;
   padding: 1em;
   z-index: 5;
   background-color: #f1f1f1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 nav a {
   text-decoration: none;
   text-transform: capitalize;
   color: #252525;
+  font-weight: 600;
 }
 </style>

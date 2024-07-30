@@ -3,6 +3,7 @@ import HomeView from '@/views/HomeView.vue'
 import UploadView from '@/views/UploadView.vue'
 import OrderView from '@/views/OrderView.vue'
 import SearchView from '@/views/SearchView.vue'
+import ItemUpdateview from '@/views/ItemUpdateview.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -25,6 +26,12 @@ const router = createRouter({
       path: '/search',
       name: 'search',
       component: SearchView
+    },
+    {
+      path: '/item/:id',
+      name:'update',
+      component: ItemUpdateview,
+      props: true
     }
   ]
 })

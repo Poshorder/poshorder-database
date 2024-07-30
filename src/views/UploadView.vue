@@ -2,8 +2,8 @@
  <form @submit.prevent="submitData">
   <input type="file" name="" id="item-file" @change="getFile" required>
   <div class="item-img">
-    <label for="item-file">
-      <img :src="filePreview" alt="">
+    <label for="item-file" style="cursor:pointer;" title="Click to upload">
+      <img :src="filePreview || 'src/assets/icons/cam-icon.jpeg'" alt="">
     </label>
   </div>
 
@@ -20,6 +20,15 @@
     <h2>item qt</h2>
     <input type="number" placeholder="Enter item qt" id="item-qt" inputmode="numeric" v-model="itemQt" required>
   </label>
+  <label for="item-category">
+  <h2>Item Category</h2>
+  <select @change="selectCategory" ref="categorySelect">
+    <option value="electronic">Electronic</option>
+    <option value="clothe">Cloth</option>
+    <option value="sneaker">Sneaker</option>
+  </select>
+</label>
+
   <label for="item-color">
     <h2>item color</h2>
     <input type="text" placeholder="Enter item color" id="item-color" v-model="itemColor" required>
@@ -36,8 +45,8 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import { saveNewArrivals } from "../composables/index"
+import { onMounted, ref } from "vue";
+import { saveItemToCloud } from "../composables/index"
 export default {
 
   setup() {
@@ -47,7 +56,9 @@ export default {
     const itemPrice = ref('');
     const itemQt = ref('');
     const itemColor = ref('');
+    const itemCategory = ref('');
     const itemDescriptions = ref('');
+    const categorySelect = ref(null);
     const isUploading = ref(false);
     const progressRef = ref('');
 
@@ -62,6 +73,10 @@ export default {
       }
     };
 
+    const selectCategory = (e) => {
+      itemCategory.value =  e.target.value
+    }
+
     const submitData = async () => {
       const data = {
         file: fileURL.value,
@@ -69,12 +84,13 @@ export default {
         price: itemPrice.value,
         qt: itemQt.value,
         color: itemColor.value,
+        category: itemCategory.value,
         descriptions: itemDescriptions.value
       };
 
       try {
         isUploading.value = true;
-        await saveNewArrivals(data, (progress) => {
+        await saveItemToCloud(data, (progress) => {
           progressRef.value = `Upload is ${progress}% done`;
           if (progress === 100) {
             progressRef.value = 'Item uploaded to cloud storage!';
@@ -86,11 +102,19 @@ export default {
       } finally {
         isUploading.value = false;
       }
+   
     };
+    onMounted(() => {
+      // Manually trigger the initial change event
+      selectCategory({ target: categorySelect.value });
+    });
+
 
     return {
       getFile,
       submitData,
+      selectCategory,
+      categorySelect,
       filePreview,
       fileURL,
       itemName,
@@ -120,6 +144,7 @@ input[type='file'] {
 form {
 
   width: 100%;
+  margin: 5% auto;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -158,12 +183,14 @@ form {
   text-transform: capitalize;
 }
 
-label input, textarea {
+label input, textarea, select {
   outline: none;
   border: 1px solid rgba(183,185,190,0.5);
   padding: 1em 3em;
   border-radius: 0.5em;
   width: 100%;
+  font-weight: 700;
+  text-transform: capitalize;
 }
 
 textarea {

@@ -4,7 +4,8 @@ import {
   getStorage,
   ref,
   uploadBytesResumable,
-  getDownloadURL
+  getDownloadURL,
+  deleteObject
 } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js'
 
 import {
@@ -12,7 +13,10 @@ import {
   setDoc,
   doc,
   collection,
-  getDocs
+  getDocs,
+  getDoc,
+  deleteDoc,
+  updateDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js'
 
 import { v4 as uuidv4 } from 'uuid';
@@ -38,11 +42,12 @@ const db = getFirestore()
 
 
 
-function saveNewArrivals(data, progressCallback) {
+function saveItemToCloud(data, progressCallback) {
     return new Promise((resolve, reject) => {
       const itemID = uuidv4();
-      const newArrivalsRef = ref(storage, `new-arrivals/item_${itemID}`);
-      const uploadTask = uploadBytesResumable(newArrivalsRef, data.file);
+      const newArrivalsRef = ref(storage, `products/item_${itemID}`);
+   //   const allItems = ref(storage, `all-items/item_${itemID}`)
+      const uploadTask = uploadBytesResumable(newArrivalsRef,data.file);
   
       uploadTask.on(
         'state_changed',
@@ -65,7 +70,6 @@ function saveNewArrivals(data, progressCallback) {
         async () => {
           try {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            console.log(`File URL: ${downloadURL}`);
             const item = {
               id: `item_${itemID}`,
               name: data.name,
@@ -73,6 +77,8 @@ function saveNewArrivals(data, progressCallback) {
               price: data.price,
               qt: data.qt,
               color: data.color,
+              category: data.category,
+              isNew : true,
               descriptions: data.descriptions
             };
              saveDataCollection(item);
@@ -90,12 +96,16 @@ function saveNewArrivals(data, progressCallback) {
       );
     });
   }
+
   async function saveDataCollection(item) {
     try {
-      const colRef = doc(db, `new-arrivals/${item.id}`);
+      const colRef = doc(db, `products/${item.id}`);
       await setDoc(colRef, item);
       console.log('Document added!');
       alert('Document added!');
+      setInterval(() => {
+         location.reload(true);
+      },3000)
     } catch (err) {
       console.error('Error adding document:', err.message);
       alert('Error adding document:', err.message);
@@ -103,13 +113,60 @@ function saveNewArrivals(data, progressCallback) {
     }
   }
 
+  async function requestDeleteTodb(id) {
+    if (confirm('Do you want to delete this product ?!' + id)) {
 
+      try {
+        const docRef = doc(db,`products/${id}`);
+        await deleteDoc(docRef)
+        console.log('doc deleted !')
+        await requestDeleteTocloud(id)
+      } catch (error) {
+        console.log(error)
+      }
+    }else {
+      console.log('action canceled !')
+    }
+  }
 
-  async function getArrivalsCol() {
+  async function requestDeleteTocloud(id) {
+
+    try {
+      const itemRef = ref(storage,`products/${id}`)
+      await deleteObject(itemRef)
+      console.log('Item deleted in Cloud !')
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  async  function requestToRemoveFromNew(id) {
+
+    try {
+      const docRef = doc(db,`products/${id}`);
+      const snapshot = await getDoc(docRef)
+      if (snapshot.exists()) {
+        let item = snapshot.data()
+           //  item.isNew = !item.isNew
+             item.isNew ? (item.isNew = false,alert('Item removed from new arrivals !')) : (item.isNew = true, alert('Item added to new arrivals !'))
+              await updateDoc(docRef,item)
+      }else{
+        alert('Item not found !')
+      }
+    } catch (error) {
+      console.log(error)
+      alert(error.message)
+    }
+
+   
+
+  }
+
+  async function getProductsCol() {
 
     const data = []
     try {
-        const colRef = collection(db,'new-arrivals');
+        const colRef = collection(db,'products');
         const snapshot = await getDocs(colRef);
         snapshot.forEach((doc) => {
             data.push({...doc.data()})
@@ -117,7 +174,23 @@ function saveNewArrivals(data, progressCallback) {
         return data
     } catch (error) {
         console.log(error)
+        alert(error.message)
     }
    
   }
-export { saveNewArrivals, getArrivalsCol }
+
+  async function getSingleItem(itemId) {
+    try {
+      const docRef = doc(db,`products/${itemId}`);
+      const snapshot = await getDoc(docRef);
+      if (snapshot.exists) {
+        return{
+          data: snapshot.data()
+        }
+      }
+    } catch (error) {
+      console.log(error)
+      alert(error.message)
+    }
+  }
+export { saveItemToCloud, getProductsCol, requestDeleteTodb, requestToRemoveFromNew, getSingleItem }

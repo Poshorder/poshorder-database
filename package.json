@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "devStart": "nodemon server.cjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -12,6 +13,10 @@
   },
   "dependencies": {
     "@phosphor-icons/vue": "^2.2.1",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "firebase-admin": "^12.3.0",
     "uuid": "^10.0.0",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
@@ -23,6 +28,7 @@
     "@vue/eslint-config-prettier": "^9.0.0",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.23.0",
+    "nodemon": "^3.1.4",
     "prettier": "^3.2.5",
     "vite": "^5.3.1"
   }
