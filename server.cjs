@@ -1,7 +1,7 @@
 const admin = require("firebase-admin");
 
 const express = require('express');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 const cors = require('cors')
 const port = process.env.PORT || 3000
 
