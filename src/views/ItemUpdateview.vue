@@ -1,44 +1,51 @@
 <template>
-    <div class="product-container">
-      <div class="product-image">
-        <img :src="item.url" :alt="item.name" />
-      </div>
+    <form class="product-container" @submit.prevent="submitUpdate">
+      <input type="file" id="fileInput" @change="getFile">
+      <label class="product-image" for="fileInput" style="cursor:pointer;">
+        <img :src="item.url" :alt="item.name" title="Change item image!"/>
+      </label>
       <div class="product-details select">
-        <input type="text" placeholder="Item name" :value="item.name">
-        <input type="number" placeholder="Item price" inputmode="numeric" :value="item.price">
+        <input type="text" placeholder="Item name" 
+        v-model="itemName" >
+        <input type="number" placeholder="Item price" inputmode="numeric" v-model="itemPrice">
+        <input type="text" v-model=itemColor>
         <select>
-            <option :value="item.category">
-                {{item.category}}
+            <option :value="itemCategory">
+                {{itemCategory}}
             </option>
+            <option value="outfit">outfit</option>
         </select>
         <span>ID: {{item.id}} </span>
+
         <div class="select-q select">
-          <button>
-            <PhMinus size="20" />
-          </button>
-          <span>{{item.qt}}</span>
-          <button>
+          <button @click="increQt" type="button">
             <PhPlus size="20" />
+          </button>
+          <span>{{itemQt}}</span>
+          <button @click="decreQt" type="button">
+            <PhMinus size="20" />
           </button>
         </div>
       
-      <textarea placeholder="Item descriptions" :value=item.descriptions>
+      <textarea placeholder="Item descriptions"
+      v-model="itemDescriptions"
+      >
 
       </textarea>
         <div class="action-btns">
-          <button class="addto-cart">submit update</button>
-          <button class="share-btn">delete</button>
+          <button class="addto-cart" type="submit">submit update</button>
+          <button class="share-btn" type="button">delete</button>
         </div>
       </div>
-    </div>
+    </form>
   </template>
   
   <script>
   import { PhPlus, PhMinus } from '@phosphor-icons/vue'
   import { useRoute } from "vue-router"
   import { onMounted, ref } from "vue"
-  import { getSingleItem } from "../composables/index"
-  // import { ref} from "vue"
+  import { getSingleItem , updateItem} from "../composables/index"
+ 
   export default {
     components: {
       PhPlus,
@@ -47,22 +54,93 @@
     props:['itemDetails'],
     setup(){
       const route = useRoute()
-      const id = route.params.id 
-      const item = ref('{}')
-      onMounted(async () => {
-       const result = await getSingleItem(id)
-       item.value = result.data
-      });
+      const itemId = route.params.id 
+      const item = ref('{}');
+    //  const dataLoaded = ref(false);
+      const fileURL = ref('');
+      const filePreview = ref('');
+      const itemName = ref('');
+      const itemPrice = ref('');
+      const itemColor = ref('')
+      const itemCategory = ref('');
+      const itemQt = ref('');
+      const itemDescriptions = ref('');
+
+    
+
+      const increQt = () => {
+        itemQt.value += 1
+      }
+
+      const decreQt = () => {
+        itemQt.value <= 0 ? "" : itemQt.value -=1
+      }
+
+      const getFile = (e) => {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        fileURL.value = file;
+        const previewURL = URL.createObjectURL(file);
+        filePreview.value = previewURL;
+      } else {
+        alert('Invalid file type');
+      }
+    };
+      const submitUpdate = async() => {
+        const data = {
+        id: itemId,
+        file: fileURL.value,
+        name: itemName.value,
+        price: itemPrice.value,
+        qt: itemQt.value,
+        color: itemColor.value,
+        category: itemCategory.value,
+        descriptions: itemDescriptions.value
+      };
+      const result = await updateItem(data);
+      }
      
+      onMounted(async () => {
+       const result = await getSingleItem(itemId);
+     //  dataLoaded.value = true
+       item.value = result.data || {}
+       itemName.value = item.value.name
+       itemPrice.value = item.value.price
+       itemColor.value = item.value.color
+       itemCategory.value = item.value.category
+       itemQt.value = item.value.qt
+       itemDescriptions.value = item.value.descriptions
+      });
+
      return {
       item,
-      id
+      itemId,
+      fileURL,
+      filePreview,
+      itemName,
+      itemPrice,
+      itemColor,
+      itemCategory,
+      itemQt,
+      itemDescriptions,
+      submitUpdate,
+      getFile,
+      increQt,
+      decreQt
      }
     }
   }
   </script>
   
   <style scoped>
+
+    #fileInput {
+      position: absolute;
+      top: 0;
+      z-index: -1;
+      visibility: hidden;
+      opacity: 0;
+    }
   .product-container {
     margin: 10% auto 0;
     width: 100%;

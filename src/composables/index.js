@@ -44,9 +44,9 @@ const db = getFirestore()
 
 function saveItemToCloud(data, progressCallback) {
     return new Promise((resolve, reject) => {
-      const itemID = uuidv4();
+      const itemID = data.id || uuidv4() 
       const newArrivalsRef = ref(storage, `products/item_${itemID}`);
-   //   const allItems = ref(storage, `all-items/item_${itemID}`)
+  
       const uploadTask = uploadBytesResumable(newArrivalsRef,data.file);
   
       uploadTask.on(
@@ -54,7 +54,7 @@ function saveItemToCloud(data, progressCallback) {
         (snapshot) => {
           // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
           const progress = Math.floor((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-         // console.log('Upload is ' + progress + '% done');
+         console.log('Upload is ' + progress + '% done');
          if (progressCallback) {
              progressCallback(progress); // Call the progress callback with the progress value
             }
@@ -123,6 +123,7 @@ function saveItemToCloud(data, progressCallback) {
         await requestDeleteTocloud(id)
       } catch (error) {
         console.log(error)
+        alert(error.message)
       }
     }else {
       console.log('action canceled !')
@@ -137,6 +138,7 @@ function saveItemToCloud(data, progressCallback) {
       console.log('Item deleted in Cloud !')
     } catch (error) {
       console.log(error)
+      alert(error.message)
     }
   }
 
@@ -193,4 +195,34 @@ function saveItemToCloud(data, progressCallback) {
       alert(error.message)
     }
   }
-export { saveItemToCloud, getProductsCol, requestDeleteTodb, requestToRemoveFromNew, getSingleItem }
+
+  async function updateItemToCloud(id,file) {
+    const itemRef = ref(storage,`products/${id}`);
+    const uploadTask = uploadBytesResumable(itemRef,file);
+
+    uploadTask.on('state_changed',(snapshot) => {
+  // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+  const progress = Math.floor((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+  console.log('Upload is ' + progress + '% done');
+    });
+  }
+  async function updateItem(data){
+   
+    if (data.file) {
+      await updateItemToCloud(data.id,data.file)
+    }
+
+    const docRef = doc(db,`products/${data.id}`)
+    const snapshot = await getDoc(docRef)
+
+    if (snapshot.exists) {
+      await updateDoc(docRef,data);
+      console.log('data updated !')
+    }else {
+      console.log('no such doc')
+    }
+
+
+
+  }
+export { saveItemToCloud, getProductsCol, requestDeleteTodb, requestToRemoveFromNew, getSingleItem, updateItem }

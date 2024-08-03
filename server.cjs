@@ -5,14 +5,13 @@ const bodyParser = require('body-parser');
 const cors = require('cors')
 const port = process.env.PORT || 3000
 
-const serviceAccount = require("./serviceAccount/nico-huncho-firebase-adminsdk-hrjih-f8009f5b6d.json");
+const serviceAccount = require("./serviceAccount/nico-huncho-firebase-adminsdk-hrjih-225c62742b.json");
 
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://nico-huncho-default-rtdb.firebaseio.com"
 });
-
 
 
 const app = express();

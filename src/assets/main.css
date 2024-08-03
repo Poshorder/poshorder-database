@@ -38,7 +38,7 @@ img {
 
 .wrapper .card {
   border: 1px solid rgba(183, 185, 190, 0.5);
-  height: fit-content;
+  height: 30rem;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -56,6 +56,9 @@ img {
   text-align: left;
   text-transform: capitalize;
   padding: 0.7em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: wrap;
 }
 
 .action-btns {

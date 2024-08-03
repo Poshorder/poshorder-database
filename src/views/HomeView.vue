@@ -115,11 +115,5 @@ export default {
 </script>
 
 <style scoped>
-.action-feedback {
-
-  text-align: left;
-  padding: 1em;
-  color: rgb(202, 34, 34);
-}
 
 </style>
